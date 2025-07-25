@@ -8,7 +8,11 @@ import { fileURLToPath } from 'url';
 
 const CLIENT_ID = 'bJi7BpHf7SJN6_ajVrRNA9nRaeOchgK7';
 const CLIENT_SECRET = 'yH_ri27R4yeVUA_JySVlVE2UaAkvdCTvfIB3O-oQ';
-const CALLBACK_URL = 'http://localhost:3005/api/callback/uber';
+// Set callback URL based on environment
+const isProd = true;
+const CALLBACK_URL = isProd
+    ? 'https://callback-thirdparty.vercel.app/api/callback/uber'
+    : 'http://localhost:3005/api/callback/uber';
 
 // DoorDash credentials (replace with your real values)
 const DOORDASH_CLIENT_ID = 'YOUR_DOORDASH_CLIENT_ID';
