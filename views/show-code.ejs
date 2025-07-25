@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Code Received</title>
+</head>
+<body>
+    <h1>OAuth Callback</h1>
+    <% if (provider) { %>
+        <h2>Provider: <%= provider %></h2>
+    <% } %>
+    <% if (code) { %>
+        <p><strong>Code:</strong> <%= code %></p>
+    <% } else { %>
+        <p>No code received.</p>
+    <% } %>
+</body>
+</html> 
