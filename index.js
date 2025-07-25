@@ -73,6 +73,11 @@ app.get('/show-code', (req, res) => {
     res.render('show-code', { code, provider });
 });
 
+// Sample API route for backend health check
+app.get('/', (req, res) => {
+    res.json({ success: true, message: 'Backend is working!' });
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 }); 
