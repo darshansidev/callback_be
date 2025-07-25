@@ -83,6 +83,20 @@ app.get('/', (req, res) => {
     res.json({ success: true, message: 'Backend is working!' });
 });
 
+// Uber OAuth callback (manual Express route)
+app.get('/api/callback/uber', (req, res) => {
+    const { code } = req.query;
+    console.log('Uber OAuth code:', code);
+    res.redirect(`/show-code?code=${encodeURIComponent(code || '')}&provider=uber`);
+});
+
+// DoorDash OAuth callback (manual Express route)
+app.get('/api/callback/doordash', (req, res) => {
+    const { code } = req.query;
+    console.log('DoorDash OAuth code:', code);
+    res.redirect(`/show-code?code=${encodeURIComponent(code || '')}&provider=doordash`);
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 }); 
