@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const CLIENT_ID = 'bJi7BpHf7SJN6_ajVrRNA9nRaeOchgK7';
 const CLIENT_SECRET = 'yH_ri27R4yeVUA_JySVlVE2UaAkvdCTvfIB3O-oQ';
-const CALLBACK_URL = 'http://localhost:3005/callback';
+const CALLBACK_URL = 'https://callback-thirdparty.vercel.app/api/callback/uber';
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -42,9 +42,11 @@ passport.deserializeUser((obj, done) => done(null, obj));
 app.get('/auth/uber', passport.authenticate('uber'));
 
 // Uber Callback endpoint
-app.get('/callback',
+app.get('/api/callback/uber',
     passport.authenticate('uber', { failureRedirect: '/login' }),
     (req, res) => {
+        console.log(req, "asdlsakdjalskdjklsajdansdk")
+        console.log(res, "-------------------------------------")
         // Successful authentication
         // You now have access to req.user.accessToken and req.user.refreshToken
         res.json({
