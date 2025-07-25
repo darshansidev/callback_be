@@ -73,6 +73,11 @@ app.get('/show-code', (req, res) => {
     res.render('show-code', { code, provider });
 });
 
+// Privacy Policy route
+app.get('/privacy-policy', (req, res) => {
+    res.render('privacy-policy');
+});
+
 // Sample API route for backend health check
 app.get('/', (req, res) => {
     res.json({ success: true, message: 'Backend is working!' });
