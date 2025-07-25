@@ -2,12 +2,19 @@ import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as UberStrategy } from 'passport-uber-v2';
+import { Strategy as OAuth2Strategy } from 'passport-oauth2';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const CLIENT_ID = 'bJi7BpHf7SJN6_ajVrRNA9nRaeOchgK7';
-const CLIENT_SECRET = 'yH_ri27R4yeVUA_JySVlVE2UaAkvdCTvfIB3O-oQ';
-const CALLBACK_URL = 'https://callback-thirdparty.vercel.app/api/callback/uber';
+// Uber credentials
+const UBER_CLIENT_ID = 'bJi7BpHf7SJN6_ajVrRNA9nRaeOchgK7';
+const UBER_CLIENT_SECRET = 'yH_ri27R4yeVUA_JySVlVE2UaAkvdCTvfIB3O-oQ';
+const UBER_CALLBACK_URL = 'https://callback-thirdparty.vercel.app/api/callback/uber';
+
+// DoorDash credentials (replace with your real values)
+const DOORDASH_CLIENT_ID = 'YOUR_DOORDASH_CLIENT_ID';
+const DOORDASH_CLIENT_SECRET = 'YOUR_DOORDASH_CLIENT_SECRET';
+const DOORDASH_CALLBACK_URL = 'https://callback-thirdparty.vercel.app/api/callback/doordash';
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -20,17 +27,32 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Passport Uber Strategy
-passport.use(new UberStrategy({
-    clientID: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
-    callbackURL: CALLBACK_URL,
+passport.use('uber', new UberStrategy({
+    clientID: UBER_CLIENT_ID,
+    clientSecret: UBER_CLIENT_SECRET,
+    callbackURL: UBER_CALLBACK_URL,
     scope: ['profile'],
 },
     function (accessToken, refreshToken, profile, done) {
-        // Attach tokens to user profile
         profile.accessToken = accessToken;
         profile.refreshToken = refreshToken;
         return done(null, profile);
+    }
+));
+
+// DoorDash Strategy (OAuth2)
+passport.use('doordash', new OAuth2Strategy({
+    authorizationURL: 'https://doordash.com/oauth/v2/authorize',
+    tokenURL: 'https://doordash.com/oauth/v2/token',
+    clientID: DOORDASH_CLIENT_ID,
+    clientSecret: DOORDASH_CLIENT_SECRET,
+    callbackURL: DOORDASH_CALLBACK_URL,
+    scope: ['profile'], // adjust as needed
+},
+    function (accessToken, refreshToken, profile, done) {
+        // DoorDash does not provide profile by default, so just return tokens
+        const user = { accessToken, refreshToken };
+        return done(null, user);
     }
 ));
 
@@ -38,23 +60,27 @@ passport.use(new UberStrategy({
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
-// Uber Auth endpoint
+// Auth endpoints
 app.get('/auth/uber', passport.authenticate('uber'));
+app.get('/auth/doordash', passport.authenticate('doordash'));
 
-// Uber Callback endpoint
+// Uber callback
 app.get('/api/callback/uber',
     passport.authenticate('uber', { failureRedirect: '/login' }),
     (req, res) => {
-        console.log(req, "asdlsakdjalskdjklsajdansdk")
-        console.log(res, "-------------------------------------")
         // Successful authentication
-        // You now have access to req.user.accessToken and req.user.refreshToken
-        res.json({
-            message: `Hello, ${req.user.displayName || 'user'}!`,
-            accessToken: req.user.accessToken,
-            refreshToken: req.user.refreshToken,
-            profile: req.user
-        });
+        const { accessToken, refreshToken } = req.user;
+        res.redirect(`/show-code?code=${encodeURIComponent(accessToken || '')}&provider=uber`);
+    }
+);
+
+// DoorDash callback
+app.get('/api/callback/doordash',
+    passport.authenticate('doordash', { failureRedirect: '/login' }),
+    (req, res) => {
+        // Successful authentication
+        const { accessToken, refreshToken } = req.user;
+        res.redirect(`/show-code?code=${encodeURIComponent(accessToken || '')}&provider=doordash`);
     }
 );
 
@@ -83,20 +109,6 @@ app.get('/privacy-policy', (req, res) => {
 // Sample API route for backend health check
 app.get('/', (req, res) => {
     res.json({ success: true, message: 'Backend is working!' });
-});
-
-// Uber OAuth callback (manual Express route)
-app.get('/api/callback/uber', (req, res) => {
-    const { code } = req.query;
-    console.log('Uber OAuth code:', code);
-    res.redirect(`/show-code?code=${encodeURIComponent(code || '')}&provider=uber`);
-});
-
-// DoorDash OAuth callback (manual Express route)
-app.get('/api/callback/doordash', (req, res) => {
-    const { code } = req.query;
-    console.log('DoorDash OAuth code:', code);
-    res.redirect(`/show-code?code=${encodeURIComponent(code || '')}&provider=doordash`);
 });
 
 app.listen(PORT, () => {
