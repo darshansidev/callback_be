@@ -277,6 +277,12 @@ app.use((req, res) => {
         message: `Route ${req.method} ${req.path} not found`
     });
 });
+app.get('/auth/linkedin/callback', async (req, res) => {
+    const { code, state } = req.query;
+    res.json({ code, state });
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
