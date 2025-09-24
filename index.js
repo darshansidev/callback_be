@@ -210,6 +210,12 @@ app.get('/api/callback/doordash',
     }
 );
 
+// Redirect URL for linkdin
+app.get('/auth/linkedin/callback', async (req, res) => {
+    const { code, state } = req.query;
+    res.json({ code, state });
+});
+
 // Login failure endpoint with better error information
 app.get('/login', (req, res) => {
     console.log('Login failure endpoint hit');
@@ -277,10 +283,7 @@ app.use((req, res) => {
         message: `Route ${req.method} ${req.path} not found`
     });
 });
-app.get('/auth/linkedin/callback', async (req, res) => {
-    const { code, state } = req.query;
-    res.json({ code, state });
-});
+
 
 
 
